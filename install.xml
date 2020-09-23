@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <name>Paysafe:cash Modification</name>
+    <version>1.0.0</version>
+    <author>Paysafe</author>
+    <code>paysafecash</code>
+    <file path="admin/controller/common/menu.php">
+        <operation>
+            <search><![CDATA[return $this->load->view('common/menu.tpl', $data);]]></search>
+	        <add position="before"><![CDATA[
+	   //paysafecash oc2.0.* & oc2.1.*
+	   $data['text_paysafecash'] = "Paysafe:cash";
+	   $data['paysafecash'] = $this->url->link('payment/paysafecash/listorders' , 'token=' . $this->session->data['token'], true);
+]]></add>
+        </operation>
+	</file>
+    <file path="admin/controller/common/menu.php">
+        <operation>
+            <search><![CDATA[return $this->load->view('common/menu', $data);]]></search>
+            <add position="before"><![CDATA[
+       //paysafecash oc2.2.*
+       $data['text_paysafecash'] = "Paysafe:cash";
+       $data['paysafecash'] = $this->url->link('payment/paysafecash/listorders' , 'token=' . $this->session->data['token'], true);
+]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/common/menu.tpl">
+        <operation>
+            <search><![CDATA[<li><a class="parent"><i class="fa fa-share-alt fa-fw"></i> <span><?php echo $text_marketing; ?></span></a>]]></search>
+    	    <add position="before"><![CDATA[
+      <li id="paysafecash"><a href="<?php echo $paysafecash; ?>"><i class="fa fa-money"></i> <span><?php echo $text_paysafecash; ?></span></a></li>
+    ]]></add>
+        </operation>
+    </file>
+</modification>
