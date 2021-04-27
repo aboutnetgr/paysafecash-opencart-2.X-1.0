@@ -62,6 +62,12 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label" for="paysafecash_submerchant_id"><span data-toggle="tooltip" title="" data-original-title="<?php echo $entry_paysafecash_submerchant_id; ?>"><?php echo $text_paysafecash_submerchant_id; ?></span></label>
+                            <div class="col-sm-10">
+                                <input type="text" name="paysafecash_submerchant_id" value="<?php echo $paysafecash_submerchant_id; ?>"  class="form-control" id="paysafecash_submerchant_id" />
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label" ><span data-toggle="tooltip" title="" data-original-title="<?php echo $entry_paysafecash_customer_data; ?>"><?php echo $text_paysafecash_customer_data; ?></span></label>
                             <div class="col-sm-10">
                                 <label class="checkbox-inline"><input type="checkbox" name="paysafecash_customer_data" <?php echo($paysafecash_customer_data ? 'checked="checked"' : '') ?> value="1"> <?php echo $text_yes; ?></label>
@@ -148,6 +154,27 @@
                             </div>
                         </div>
 
+
+                        <?php foreach ($languages as $language) { ?>
+                        <div class="form-group required">
+                            <label class="col-sm-2 control-label" for="input-payment_description<?php echo $language['language_id']; ?>"><?php echo $entry_payment_description; ?></label>
+                            <div class="col-sm-10">
+                                <div class="input-group"><span class="input-group-addon"><img src="<?php echo $language['image']; ?>" title="<?php echo $language['name']; ?>" /></span>
+                                    <textarea name="paysafecash_payment_description<?php echo $language['language_id']; ?>" cols="80" rows="10" placeholder="<?php echo $entry_payment_description; ?>" id="input-payment_description<?php echo $language['language_id']; ?>" class="form-control"><?php echo isset(${'paysafecash_payment_description'.$language['language_id']}) ? ${'paysafecash_payment_description'.$language['language_id']} : ''; ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-sm-2 control-label" for="input-confirm_description<?php echo $language['language_id']; ?>"><?php echo $entry_confirm_description; ?></label>
+                            <div class="col-sm-10">
+                                <div class="input-group"><span class="input-group-addon"><img src="<?php echo $language['image']; ?>" title="<?php echo $language['name']; ?>" /></span>
+                                    <textarea name="paysafecash_confirm_description<?php echo $language['language_id']; ?>" cols="80" rows="10" placeholder="<?php echo $entry_confirm_description; ?>" id="input-confirm_description<?php echo $language['language_id']; ?>" class="form-control"><?php echo isset(${'paysafecash_confirm_description'.$language['language_id']}) ? ${'paysafecash_confirm_description'.$language['language_id']} : ''; ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <?php } ?>
+
+
                         <div class="form-group">
                             <label class="col-sm-2 control-label" for="input-status"><?php echo $entry_status; ?></label>
                             <div class="col-sm-10">
@@ -187,6 +214,10 @@
     </div>
 </div>
   <script type="text/javascript"><!--
+<?php foreach ($languages as $language) { ?>
+$('#input-payment_description<?php echo $language['language_id']; ?>').summernote({height: 300});
+$('#input-confirm_description<?php echo $language['language_id']; ?>').summernote({height: 300});
+<?php } ?>
 
 $("#version-data-checker-btn").on("click", function() {
     $("#version-data-checker").html('<span class="fa fa-cog fa-spin fa-3x fa-fw"></span>');

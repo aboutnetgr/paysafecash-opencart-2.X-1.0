@@ -33,7 +33,7 @@ class ControllerPaymentPaysafecash extends Controller
 
         $data['button_proceed'] =  $this->language->get('button_proceed');
 
-        $data['payment_description'] =  $this->language->get('payment_description');
+        $data['confirm_description'] =  html_entity_decode($this->config->get('paysafecash_confirm_description' . $this->config->get('config_language_id')), ENT_QUOTES, 'UTF-8');
 
         if ($debug_mode) {
             $this->log->write('FRONT (paysafe:cash): Start ');
@@ -87,7 +87,12 @@ class ControllerPaymentPaysafecash extends Controller
             $this->response->redirect($this->url->link('checkout/checkout', '', true));
         }
 
-        $order_amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
+        // if test mode then order amount is 1
+        if ($test_mode) {
+            $order_amount = 1;
+        } else {
+            $order_amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
+        }
 
         $pscpayment = $this->get_connection();
         $success_url = $this->url->link('payment/paysafecash/success'.'&order_id=' . $order_info["order_id"]);
@@ -118,7 +123,6 @@ class ControllerPaymentPaysafecash extends Controller
                 "address1"     => $order_info['payment_address_1'],
                 "postcode"     => $order_info['payment_postcode'],
                 "city"         => $order_info['payment_city'],
-                "country_iso2" => $order_info['payment_iso_code_2'],
                 "phone_number" => $order_info['telephone'],
                 "email"        => $order_info['email']
             ];
@@ -141,8 +145,8 @@ class ControllerPaymentPaysafecash extends Controller
             'country_restriction' => $this->config->get('paysafecash_countries'),
             'kyc_restriction' => '',
             'min_age' => '',
-            'shop_id' => "Opencart ".VERSION." | ".$this->version,
-            'env' => '',
+            'shop_id' => $order_info["store_name"]." ".VERSION." | ".$this->version,
+            'env' => ($env == 'TEST' ? '' : $paysafecash_submerchant_id),
         ];
 
         if ($debug_mode) {
@@ -283,14 +287,11 @@ class ControllerPaymentPaysafecash extends Controller
                     }
                     $this->model_payment_paysafecash->validatePaymentOrder($order_id, (int)$this->config->get('paysafecash_awaiting_order_status_id'), $payment_id);
                     if ($this->customer->isLogged()) {
-                        //$redirect = $this->url->link('account/order/info', 'order_id=' . $order_id);
-                        $redirect = $this->url->link('checkout/success');
+                        $redirect = $this->url->link('account/order/info', 'order_id=' . $order_id);
                     } else {
                         $redirect = $this->url->link('checkout/success');
                     }
                 } elseif ($response["status"] == "EXPIRED") {
-                    $this->model_payment_paysafecash->validatePaymentOrder($order_id, (int)$this->config->get('paysafecash_declined_order_status_id'), $payment_id);
-                    $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('paysafecash_declined_order_status_id'), "Declined by expiration (EXPIRED)!", false);
                 } elseif ($response["status"] == "AUTHORIZED") {
                     $response_capture = $pscpayment->capturePayment($payment_id);
                     if ($debug_mode) {
@@ -367,8 +368,9 @@ class ControllerPaymentPaysafecash extends Controller
         $debug_mode = $this->config->get('paysafecash_debug_mode');
 
         if ($debug_mode) {
-            $this->log->write('FRONT (paysafe:cash => failure): ('.$this->request->server['REQUEST_URI'].') Transaction aborted by the user: '.print_r($this->request->get, true));
+            $debug_mode = $this->config->get('paysafecash_debug_mode');
         }
+        $this->log->write('FRONT (paysafe:cash => failure): ('.$this->request->server['REQUEST_URI'].') Transaction aborted by the user: '.print_r($this->request->get, true));
 
         $order_id = isset($this->request->get['order_id']) ? $this->request->get['order_id'] : 0;
         $payment_id = isset($this->request->get['payment_id']) ? $this->request->get['payment_id'] : '';
@@ -377,8 +379,6 @@ class ControllerPaymentPaysafecash extends Controller
             $this->model_payment_paysafecash->validatePaymentOrder($order_info["order_id"], (int)$this->config->get('paysafecash_declined_order_status_id'), $payment_id);
             $this->model_checkout_order->addOrderHistory($order_info["order_id"], $this->config->get('paysafecash_declined_order_status_id'), "Declined by client!", false);
         }
-
-        //$this->session->data['error'] = "Error: test test!";
         $this->response->redirect($this->url->link('checkout/checkout', '', true));
     }
 
@@ -443,8 +443,6 @@ class ControllerPaymentPaysafecash extends Controller
                     }
                 } elseif ($response["status"] == "INITIATED" || $response["status"] == "REDIRECTED") {
                 } elseif ($response["status"] == "EXPIRED") {
-                    $this->model_payment_paysafecash->validatePaymentOrder($order_id, (int)$this->config->get('paysafecash_declined_order_status_id'), $payment_id);
-                    $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('paysafecash_declined_order_status_id'), "Declined by expiration (EXPIRED)!", false);
                 } elseif ($response["status"] == "AUTHORIZED") {
                     $response_capture = $pscpayment->capturePayment($payment_id);
                     if ($debug_mode) {

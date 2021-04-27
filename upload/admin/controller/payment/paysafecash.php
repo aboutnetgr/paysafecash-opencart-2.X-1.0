@@ -571,7 +571,11 @@ class ControllerPaymentPaysafecash extends Controller
                         $customer_hash = md5($order_info[0]['email']);
                     }
 
-                    $order_amount = $this->currency->format($order_info[0]['total'], $order_info[0]['currency_code'], $order_info[0]['currency_value'], false);
+                    if ($test_mode) {
+                        $order_amount = 1;
+                    } else {
+                        $order_amount = $this->currency->format($order_info[0]['total'], $order_info[0]['currency_code'], $order_info[0]['currency_value'], false);
+                    }
 
                     $data_payment = [
                         'payment_id' => $order_info[0]['payment_id'],
@@ -581,7 +585,7 @@ class ControllerPaymentPaysafecash extends Controller
                         'customer_mail' => $order_info[0]['email'],
                         'correlation_id' => '',
                         'submerchant_id' => '',
-                        'shop_id' => "Opencart ".VERSION." | ".$this->version,
+                        'shop_id' => $order_info[0]["store_name"]." ".VERSION." | ".$this->version,
                     ];
 
                     if ($debug_mode) {

@@ -3,8 +3,6 @@ class ModelPaymentPaysafecash extends Model
 {
     public function getMethod($address, $total)
     {
-        $this->load->language('payment/paysafecash');
-
         // check if settings (country) is enabled for order's country
         if (in_array($address['iso_code_2'], $this->config->get('paysafecash_countries'))) {
             $status = true;
@@ -18,7 +16,7 @@ class ModelPaymentPaysafecash extends Model
             $method_data = [
                 'code' => 'paysafecash',
                 'title' => 'Paysafe:cash',
-                'terms' => $this->language->get('payment_description'),
+                'terms' => html_entity_decode($this->config->get('paysafecash_payment_description' . $this->config->get('config_language_id')), ENT_QUOTES, 'UTF-8'),
                 'sort_order' => $this->config->get('paysafecash_sort_order')
             ];
         }
